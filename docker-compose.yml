@@ -1,15 +1,18 @@
 version: "3.8"
+
 services:
-  mysql:
+  mysql: 
     image: mysql:latest
     container_name: mysql
+    ports:
+      - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=Test@123
-      - MYSQL_DATABASE=BankDB
+      MYSQL_ROOT_PASSWORD: "Test@123"
+      MYSQL_DATABASE: "BankDB"
+    networks: 
+      - banknet
     volumes:
-      - bankapp-volume:/var/lib/mysql
-    networks:
-      - bankapp
+      - mysqlvol:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -17,20 +20,20 @@ services:
       retries: 3
       start_period: 30s
 
-  mainapp:
-    image: ${DUSER}/${IMAGE}
-    container_name: Bankapp
-    environment:
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/BankDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_PASSWORD=Test@123
+  bankapp:
+    container_name: bankapplication
+    image: sharmaaakash170/springboot-bank-app:latest
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_USERNAME= "root"
+      - SPRING_DATASOURCE_URL= "jdbc:mysql://mysql:3306/BankDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      - SPRING_DATASOURCE_PASSWORD= "Test@123"
+    networks:
+      - banknet
     depends_on:
       mysql:
         condition: service_healthy
-    networks:
-      - bankapp
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
@@ -40,7 +43,7 @@ services:
       start_period: 30s
 
 networks:
-  bankapp:
+  banknet:
 
 volumes:
-    bankapp-volume:
+    mysqlvol:
