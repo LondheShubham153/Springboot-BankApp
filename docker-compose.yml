@@ -18,14 +18,14 @@ services:
       start_period: 30s
 
   mainapp:
-    image: ${DUSER}/${IMAGE}
+    image: devopscrusher/bankapp:latest
     container_name: Bankapp
     environment:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/BankDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_PASSWORD=Test@123
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       mysql:
         condition: service_healthy
